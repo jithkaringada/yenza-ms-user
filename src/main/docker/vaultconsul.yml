@@ -1,0 +1,39 @@
+version: '3.6'
+services:
+  consul:
+    container_name: consul
+    image: consul:1.4.0
+    ports:
+      - "8600:8600/udp"
+      - "8500:8500"
+      - "8300:8300"
+    volumes:
+      - ./consul/config/consul-config.json:/consul/config/config.json:ro
+      - ./consul/data:/consul/data:rw
+    command: consul agent -dev -ui -client 0.0.0.0
+    networks:
+      - yenza-network
+  vault:
+    container_name: vault
+    image: vault:0.11.3
+    depends_on:
+      - consul
+    links:
+      - consul:consul
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/policies:/vault/policies
+      - ./vault/data:/vault/data
+      - ./vault/logs:/vault/logs
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+    cap_add:
+      - IPC_LOCK
+    command: server -config=/vault/config/vault-config.hcl
+    networks:
+      - yenza-network
+networks:
+  yenza-network:
+    driver: bridge

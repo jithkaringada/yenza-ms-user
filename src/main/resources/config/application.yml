@@ -1,0 +1,29 @@
+logging:
+  level:
+    org:
+      springframework:
+        web: INFO
+        security: INFO
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    enabled-by-default: true
+    web:
+      base-path: '/api/management'
+      exposure:
+        include: "*"
+  health:
+    mongo:
+      enabled: true
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: yenza-ms-user
+  cloud:
+    consul:
+      discovery:
+        healthCheckPath: /api/management/health
+        instanceId: ${spring.application.name}:${spring.application.instance-id:${random.value}}

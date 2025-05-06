@@ -1,0 +1,126 @@
+logging:
+  level:
+    ROOT: INFO
+    org.springframework.web.filter.CommonsRequestLoggingFilter: INFO
+    com.yenzaga.msuser: INFO
+    org.springframework.boot: INFO
+    org.springframework.security: DEBUG
+spring:
+  data:
+    mongodb:
+      database: yenza_ms_user
+      host: localhost
+      port: 27017
+      username: root
+      password: password
+      authentication-database: admin
+  security:
+    oauth2:
+      client:
+        registration:
+          local:
+            client-id: yenzagauser_client
+            client-secret: ec22ec31-1591-4345-af7e-599f263e6c6d
+            authorization-grant-type: client_credentials
+            scope: profile,roles
+        provider:
+          local:
+            token-uri: https://yenzaga.ngrok.io/auth/realms/yenzaga/protocol/openid-connect/token
+  profile:
+    active: dev
+    include: swagger
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: false
+  jackson:
+    serialization.indent_output: true
+  cloud:
+    consul:
+      discovery:
+        prefer-ip-address: true
+      host: localhost
+      port: 8500
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+      bindings:
+        emails-to-be-sent-out-stream:
+          destination: com.yenza.emails
+          contentType: application/json
+  messages:
+    cache-seconds: 1
+  zipkin:
+    base-url: http://localhost:9411
+    enabled: true
+    locator:
+      discovery:
+        enabled: true
+# ===================================================================
+# To enable SSL, generate a certificate using:
+# keytool -genkey -alias shopperslife_ms_uaa -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore.jks keystore.jks.p12 -validity 3650
+#
+# You can also use Let's Encrypt:
+# https://maximilian-boehm.com/hp2121/Create-a-Java-Keystore-JKS-from-Let-s-Encrypt-Certificates.htm
+#
+# Then, modify the server.ssl properties so your "server" configuration looks like:
+#
+# server:
+#    port: 8443
+#    ssl:
+#        key-store: keystore.jks.p12
+#        key-store-password: <your-password>
+#        key-store-type: PKCS12
+#        key-alias: shopperslife_ms_uaa
+# ===================================================================
+server:
+  port: 8070
+
+# ===================================================================
+
+appcore:
+  http:
+    version: V_1_1 #to use HTTP/2 you will need SSL Support (see above the server.ssl configuration)
+  cache:
+    hazelcast:
+      time-to-live-seconds: 3600
+      backup-count: 1
+      management-center:
+        enabled: true
+        update-interval: 3
+        url: http://localhost:8180/mancenter
+  cors:
+    allowed-origins: "http://127.0.0.1:3000"
+    allowed-methods: "*"
+    allowed-headers: "*"
+    exposed-headers: "Authorization,Link,X-Total-Count"
+    allowed-credentials: true
+    max-age: 1800
+  metrics:
+    jmx.enabled: true
+    graphite: #use the 'graphite' Maven profile to have the Graphite dependencies
+      enabled: false
+      host: localhost
+      port: 2003
+      prefix: yenza-ms-uaa
+    prometheus: #use the 'prometheus' Maven profile to have the Prometheus dependencies
+      enabled: false
+      endpoint: /prometheusMetrics
+    logs: #Reports DropWizard metrics in the logs
+      enabled: false
+      report-frequency: 60 #in seconds
+security:
+  oauth2:
+    signature-verification:
+      public-key-endpoint-uri: https://yenzaga.ngrok.io/auth/realms/yenzaga #http://127.0.0.1:9999/ms/uaa/api/auth/oauth/token_key
+      #ttl for public keys to verify JWT tokens (in ms)
+      ttl: 3600000
+      #max. rate at which public keys will be fetched (in ms)
+      public-key-refresh-rate-limit: 10000
+    realm:
+      base-url: yenzaga.ngrok.io
+      realm-name: yenzaga
+      redirect-url: https://yenzaga-gateway.ngrok.io/api/auth/home
+application:

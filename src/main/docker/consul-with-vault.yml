@@ -1,0 +1,59 @@
+version: '3.6'
+services:
+  vault:
+    build:
+      context: ./vault
+      dockerfile: Dockerfile
+    ports:
+      - 8200:8200
+    container_name: vault
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/policies:/vault/policies
+      - ./vault/data:/vault/data
+      - ./vault/logs:/vault/logs
+    command: server -config=/vault/config/vault-config.hcl
+    cap_add:
+      - IPC_LOCK
+    depends_on:
+      - consul-agent-1
+      - consul-agent-2
+      - consul-agent-3
+      - consul-server-1
+      - consul-server-2
+
+  consul-agent-1: &consul-agent
+    image: consul:1.3.0
+    networks:
+      - consul-local
+    command: "agent -client 0.0.0.0 -bind 0.0.0.0 -config-file=/consul/config/config.json"
+    volumes:
+      - ./consul/config/consul-config.json:/consul/config/config.json
+      - ./consul/data:/consul/data
+
+  consul-agent-2:
+    <<: *consul-agent
+
+  consul-agent-3:
+    <<: *consul-agent
+
+  consul-server-1: &consul-server
+    <<: *consul-agent
+    command: "agent -server -client 0.0.0.0 -bind 0.0.0.0 -config-file=/consul/config/config.json"
+
+  consul-server-2:
+    <<: *consul-server
+
+  consul-server-bootstrap:
+    <<: *consul-agent
+    ports:
+      - "8400:8400"
+      - "8500:8500"
+      - "8600:8600"
+      - "8600:8600/udp"
+    command: "agent -bootstrap-expect 3 -ui -client 0.0.0.0 -bind 0.0.0.0 -config-file=/consul/config/config.json"
+
+networks:
+  consul-local:

@@ -1,0 +1,1 @@
+{"Token":"","Service":{"ID":"faceoftravel-ms-gateway-fbfd4a62fd35a482e0e6cbf32fb32ec1","Service":"faceoftravel-ms-gateway","Tags":["profile=dev","version="],"Address":"10.0.0.240","Meta":null,"Port":9000,"Weights":null,"EnableTagOverride":false,"ProxyDestination":"","Proxy":{},"Connect":{},"CreateIndex":0,"ModifyIndex":0}}
